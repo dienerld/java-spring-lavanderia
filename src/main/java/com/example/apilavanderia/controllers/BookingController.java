@@ -1,10 +1,13 @@
 package com.example.apilavanderia.controllers;
 
+import com.example.apilavanderia.CustomExceptions.BookingException;
+import com.example.apilavanderia.Dtos.ResponseError;
 import com.example.apilavanderia.classes.Booking;
 import com.example.apilavanderia.classes.CreateBookingDto;
 import com.example.apilavanderia.classes.OutputBookingDto;
 import com.example.apilavanderia.database.Database;
 import com.example.apilavanderia.enums.Machine;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -21,12 +24,13 @@ public class BookingController {
     }
 
     @GetMapping
-    public List<OutputBookingDto> getAll() {
-        return database.getBookings().stream().map(OutputBookingDto::new).toList();
+    public ResponseEntity getAll() {
+        return ResponseEntity.ok().body(database.getBookings().stream().map(OutputBookingDto::new).toList());
     }
 
     @PostMapping
-    public OutputBookingDto create(@RequestBody CreateBookingDto newBooking) {
+    public ResponseEntity create(@RequestBody CreateBookingDto newBooking) {
+        try {
         var apt = database.getApartmentByNumber(newBooking.apartment());
         var bookings = database.getBookings();
 
@@ -39,8 +43,12 @@ public class BookingController {
                 .toList();
 
 
+
+
+
         if (filterApt.size() > 0)
-            throw new RuntimeException("Usuário com agendamento no período de +-4 dias!");
+
+            throw new BookingException("Usuário com agendamento no período de +-4 dias!");
 
 
         // Verificar se tem agendamento para mesma data
@@ -54,7 +62,7 @@ public class BookingController {
             for (Booking b : filteredList) {
                 // Verificar se máquina está reservada para X hora
                 if (b.getHour().equals(newBooking.hour())) {
-                    throw new RuntimeException("Máquina já agendada neste horário.");
+                    throw new BookingException("Máquina já agendada neste horário.");
                 }
             }
         }
@@ -62,7 +70,14 @@ public class BookingController {
         var booking = new Booking(newBooking, apt);
         database.addBookings(booking);
 
-        return new OutputBookingDto(booking);
+        return ResponseEntity.ok().body(new OutputBookingDto(booking));
+
+        }catch (BookingException e){
+            return ResponseEntity.badRequest().body(new ResponseError(e.getMessage(), e.getClass().getCanonicalName()));
+        }catch (Exception e){
+            return ResponseEntity.internalServerError().body(new ResponseError(e.getMessage(),  e.getClass().getCanonicalName()));
+
+        }
     }
 
 

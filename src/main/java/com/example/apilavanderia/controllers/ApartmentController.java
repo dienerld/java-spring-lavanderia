@@ -1,10 +1,14 @@
 package com.example.apilavanderia.controllers;
 
+import com.example.apilavanderia.Dtos.ResponseError;
+import com.example.apilavanderia.Dtos.UpdateApartment;
 import com.example.apilavanderia.classes.Apartment;
 import com.example.apilavanderia.database.Database;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/apartments")
@@ -16,19 +20,39 @@ public class ApartmentController {
     }
 
     @GetMapping
-    public List<Apartment> getAll() {
-        return database.getApartments();
+    public ResponseEntity getAll() {
+        return ResponseEntity.ok().body(database.getApartments());
     }
 
     @PostMapping
-    public Apartment create(@RequestBody Apartment newApt) {
+    public ResponseEntity create(@RequestBody Apartment newApt) {
         var aptExists = database.getApartments().stream().filter(apt -> apt.getNumber().equalsIgnoreCase(newApt.getNumber())).findFirst();
         if(aptExists.isPresent()) {
-            return null;
+            return ResponseEntity.badRequest().body(new ResponseError("Apartamento já existente!", "."));
         }
         database.addApartment(newApt);
-        return newApt;
+        return ResponseEntity.ok().body(newApt);
     }
 
+    @PutMapping("/{number}")
+    public ResponseEntity update(@RequestBody UpdateApartment dto, @PathVariable String number){
+
+        try {
+
+
+        var apt = database.getApartmentByNumber(number);
+
+
+
+        if(dto.phone() != null) apt.setPhone(dto.phone());
+        if(dto.nameResident() != null) apt.setNameResident(dto.nameResident());
+
+        return ResponseEntity.ok().body(apt);
+
+        }catch (NoSuchElementException e){
+            return ResponseEntity.badRequest().body(new ResponseError(e.getMessage(), e.getClass().getCanonicalName()));
+        }
+
+    }
 
 }
