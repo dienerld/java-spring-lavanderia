@@ -1,8 +1,7 @@
 package com.example.apilavanderia.database;
 
-import com.example.apilavanderia.classes.Apartment;
-import com.example.apilavanderia.classes.Booking;
-import lombok.Getter;
+import com.example.apilavanderia.models.Apartment;
+import com.example.apilavanderia.models.Booking;
 
 import java.util.ArrayList;
 import java.util.List;

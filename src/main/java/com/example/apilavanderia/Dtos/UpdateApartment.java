@@ -1,5 +1,4 @@
-package com.example.apilavanderia.Dtos;
+package com.example.apilavanderia.dtos;
 
 public record UpdateApartment(String nameResident, String phone) {
-
 }

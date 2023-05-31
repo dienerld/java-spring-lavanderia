@@ -1,18 +1,13 @@
 package com.example.apilavanderia.controllers;
 
-import com.example.apilavanderia.CustomExceptions.BookingException;
-import com.example.apilavanderia.Dtos.ResponseError;
-import com.example.apilavanderia.classes.Booking;
-import com.example.apilavanderia.classes.CreateBookingDto;
-import com.example.apilavanderia.classes.OutputBookingDto;
+import com.example.apilavanderia.customExceptions.BookingException;
+import com.example.apilavanderia.dtos.ResponseError;
+import com.example.apilavanderia.models.Booking;
+import com.example.apilavanderia.dtos.CreateBooking;
+import com.example.apilavanderia.dtos.OutputBooking;
 import com.example.apilavanderia.database.Database;
-import com.example.apilavanderia.enums.Machine;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-
-import java.time.LocalDate;
-import java.util.List;
 
 @RestController
 @RequestMapping("/bookings")
@@ -25,11 +20,11 @@ public class BookingController {
 
     @GetMapping
     public ResponseEntity getAll() {
-        return ResponseEntity.ok().body(database.getBookings().stream().map(OutputBookingDto::new).toList());
+        return ResponseEntity.ok().body(database.getBookings().stream().map(OutputBooking::new).toList());
     }
 
     @PostMapping
-    public ResponseEntity create(@RequestBody CreateBookingDto newBooking) {
+    public ResponseEntity create(@RequestBody CreateBooking newBooking) {
         try {
         var apt = database.getApartmentByNumber(newBooking.apartment());
         var bookings = database.getBookings();
@@ -70,7 +65,7 @@ public class BookingController {
         var booking = new Booking(newBooking, apt);
         database.addBookings(booking);
 
-        return ResponseEntity.ok().body(new OutputBookingDto(booking));
+        return ResponseEntity.ok().body(new OutputBooking(booking));
 
         }catch (BookingException e){
             return ResponseEntity.badRequest().body(new ResponseError(e.getMessage(), e.getClass().getCanonicalName()));

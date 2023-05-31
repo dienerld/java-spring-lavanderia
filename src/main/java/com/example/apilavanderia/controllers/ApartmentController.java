@@ -1,13 +1,12 @@
 package com.example.apilavanderia.controllers;
 
-import com.example.apilavanderia.Dtos.ResponseError;
-import com.example.apilavanderia.Dtos.UpdateApartment;
-import com.example.apilavanderia.classes.Apartment;
+import com.example.apilavanderia.dtos.ResponseError;
+import com.example.apilavanderia.dtos.UpdateApartment;
+import com.example.apilavanderia.models.Apartment;
 import com.example.apilavanderia.database.Database;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 
 @RestController

@@ -1,4 +1,4 @@
-package com.example.apilavanderia.classes;
+package com.example.apilavanderia.models;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,6 +12,5 @@ public class Apartment {
     private String number;
 
     private String phone;
-
 
 }
