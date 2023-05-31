@@ -1,9 +1,9 @@
-package com.example.apilavanderia.classes;
+package com.example.apilavanderia.dtos;
 
 import com.example.apilavanderia.enums.Machine;
 import com.example.apilavanderia.enums.Shift;
 
 import java.time.LocalDate;
 
-public record CreateBookingDto(String apartment, Machine machine, LocalDate date, Shift hour) {
+public record CreateBooking(String apartment, Machine machine, LocalDate date, Shift hour) {
 }

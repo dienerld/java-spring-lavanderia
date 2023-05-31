@@ -1,5 +1,7 @@
 package com.example.apilavanderia.controllers;
 
+import com.example.apilavanderia.Dtos.CreateApartment;
+import com.example.apilavanderia.Dtos.OutputApartment;
 import com.example.apilavanderia.dtos.ResponseError;
 import com.example.apilavanderia.dtos.UpdateApartment;
 import com.example.apilavanderia.models.Apartment;
@@ -24,31 +26,39 @@ public class ApartmentController {
     }
 
     @PostMapping
-    public ResponseEntity create(@RequestBody Apartment newApt) {
-        var aptExists = database.getApartments().stream().filter(apt -> apt.getNumber().equalsIgnoreCase(newApt.getNumber())).findFirst();
-        if(aptExists.isPresent()) {
-            return ResponseEntity.badRequest().body(new ResponseError("Apartamento já existente!", "."));
+    public ResponseEntity create(@RequestBody CreateApartment newApt) {
+        var aptExists = database.getApartments().stream()
+                .filter(apt -> apt.getNumber().equalsIgnoreCase(newApt.number()))
+                .findFirst();
+        if (aptExists.isPresent()) {
+            return ResponseEntity.badRequest()
+                    .body(new ResponseError("Apartamento já existente!", "."));
         }
-        database.addApartment(newApt);
-        return ResponseEntity.ok().body(newApt);
+        var apt = new Apartment(newApt);
+        database.addApartment(apt);
+        return ResponseEntity.ok().body(new OutputApartment(apt));
     }
 
     @PutMapping("/{number}")
-    public ResponseEntity update(@RequestBody UpdateApartment dto, @PathVariable String number){
+    public ResponseEntity update(@RequestBody UpdateApartment dto, @PathVariable String number) {
 
         try {
 
+            var apt = database.getApartmentByNumber(number);
 
-        var apt = database.getApartmentByNumber(number);
+            if (dto.phone() != null) apt.setPhone(dto.phone());
+            if (dto.nameResident() != null) apt.setNameResident(dto.nameResident());
+            if (dto.password() != null) {
+                if (dto.password().length() >= 6) {
+                    apt.setPassword(dto.password());
+                } else {
+                    return ResponseEntity.badRequest().body(new ResponseError("A senha precisa ter no mínimo 6 caracteres.", "InvalidPassword."));
+                }
+            }
 
+            return ResponseEntity.ok().body(apt);
 
-
-        if(dto.phone() != null) apt.setPhone(dto.phone());
-        if(dto.nameResident() != null) apt.setNameResident(dto.nameResident());
-
-        return ResponseEntity.ok().body(apt);
-
-        }catch (NoSuchElementException e){
+        } catch (NoSuchElementException e) {
             return ResponseEntity.badRequest().body(new ResponseError(e.getMessage(), e.getClass().getCanonicalName()));
         }
 
