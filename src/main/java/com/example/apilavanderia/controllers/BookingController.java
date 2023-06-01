@@ -24,9 +24,13 @@ public class BookingController {
     }
 
     @PostMapping
-    public ResponseEntity create(@RequestBody CreateBooking newBooking) {
+    public ResponseEntity create(@RequestBody CreateBooking newBooking, @RequestHeader("AuthToken") String token) {
         try {
         var apt = database.getApartmentByNumber(newBooking.apartment());
+        if(!apt.isAuthenticated(token)){
+            return ResponseEntity.badRequest()
+                    .body(new ResponseError("Token Inválido", "Unauthorized"));
+        }
         var bookings = database.getBookings();
 
         // Verificar se usuário já possui agendamento no range de +-4 dias

@@ -29,7 +29,7 @@ public class AuthController {
                 return ResponseEntity.badRequest().body(new ResponseError("Credenciais inválidas.", "Unauthorized"));
             }
 
-            return ResponseEntity.ok().body("Autorizado.");
+            return ResponseEntity.ok().body(apt.generateToken());
         } catch (NoSuchElementException e) {
             return ResponseEntity.badRequest().body(new ResponseError("Credenciais inválidas.", e.getClass().getName()));
         }

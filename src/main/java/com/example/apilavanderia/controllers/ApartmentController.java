@@ -40,11 +40,18 @@ public class ApartmentController {
     }
 
     @PutMapping("/{number}")
-    public ResponseEntity update(@RequestBody UpdateApartment dto, @PathVariable String number) {
+    public ResponseEntity update(@RequestBody UpdateApartment dto,
+                                 @PathVariable String number,
+                                 @RequestHeader("AuthToken") String token) {
 
         try {
 
             var apt = database.getApartmentByNumber(number);
+
+            if(!apt.isAuthenticated(token)){
+                return ResponseEntity.badRequest()
+                                .body(new ResponseError("Token Inválido", "Unauthorized"));
+            }
 
             if (dto.phone() != null) apt.setPhone(dto.phone());
             if (dto.nameResident() != null) apt.setNameResident(dto.nameResident());
