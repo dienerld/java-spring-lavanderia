@@ -1,5 +1,5 @@
 package com.example.apilavanderia.models;
-import com.example.apilavanderia.Dtos.CreateApartment;
+import com.example.apilavanderia.dtos.CreateApartment;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -1,6 +1,6 @@
 package com.example.apilavanderia.controllers;
 
-import com.example.apilavanderia.Dtos.RequestLogin;
+import com.example.apilavanderia.dtos.RequestLogin;
 import com.example.apilavanderia.database.Database;
 import com.example.apilavanderia.dtos.ResponseError;
 import org.springframework.http.ResponseEntity;

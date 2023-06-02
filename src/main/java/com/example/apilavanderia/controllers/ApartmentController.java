@@ -1,7 +1,7 @@
 package com.example.apilavanderia.controllers;
 
-import com.example.apilavanderia.Dtos.CreateApartment;
-import com.example.apilavanderia.Dtos.OutputApartment;
+import com.example.apilavanderia.dtos.CreateApartment;
+import com.example.apilavanderia.dtos.OutputApartment;
 import com.example.apilavanderia.dtos.ResponseError;
 import com.example.apilavanderia.dtos.UpdateApartment;
 import com.example.apilavanderia.models.Apartment;

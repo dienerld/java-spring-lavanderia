@@ -1,4 +1,4 @@
-package com.example.apilavanderia.Dtos;
+package com.example.apilavanderia.dtos;
 
 import com.example.apilavanderia.models.Apartment;
 
