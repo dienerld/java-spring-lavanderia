@@ -6,6 +6,7 @@ import com.example.apilavanderia.dtos.ResponseError;
 import com.example.apilavanderia.dtos.UpdateApartment;
 import com.example.apilavanderia.models.Apartment;
 import com.example.apilavanderia.database.Database;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +27,7 @@ public class ApartmentController {
     }
 
     @PostMapping
-    public ResponseEntity create(@RequestBody CreateApartment newApt) {
+    public ResponseEntity create(@RequestBody @Valid CreateApartment newApt) {
         var aptExists = database.getApartments().stream()
                 .filter(apt -> apt.getNumber().equalsIgnoreCase(newApt.number()))
                 .findFirst();
@@ -40,7 +41,7 @@ public class ApartmentController {
     }
 
     @PutMapping("/{number}")
-    public ResponseEntity update(@RequestBody UpdateApartment dto,
+    public ResponseEntity update(@RequestBody  UpdateApartment dto,
                                  @PathVariable String number,
                                  @RequestHeader("AuthToken") String token) {
 

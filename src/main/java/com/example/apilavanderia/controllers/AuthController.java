@@ -3,6 +3,7 @@ package com.example.apilavanderia.controllers;
 import com.example.apilavanderia.dtos.RequestLogin;
 import com.example.apilavanderia.database.Database;
 import com.example.apilavanderia.dtos.ResponseError;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,7 +23,7 @@ public class AuthController {
     }
 
     @PostMapping
-    public ResponseEntity login(@RequestBody RequestLogin login) {
+    public ResponseEntity login(@RequestBody @Valid RequestLogin login) {
         try {
             var apt = database.getApartmentByNumber(login.number());
             if(!apt.getPassword().equals(login.password())) {

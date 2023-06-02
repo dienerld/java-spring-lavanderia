@@ -6,6 +6,7 @@ import com.example.apilavanderia.models.Booking;
 import com.example.apilavanderia.dtos.CreateBooking;
 import com.example.apilavanderia.dtos.OutputBooking;
 import com.example.apilavanderia.database.Database;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +25,7 @@ public class BookingController {
     }
 
     @PostMapping
-    public ResponseEntity create(@RequestBody CreateBooking newBooking, @RequestHeader("AuthToken") String token) {
+    public ResponseEntity create(@RequestBody @Valid CreateBooking newBooking, @RequestHeader("AuthToken") String token) {
         try {
         var apt = database.getApartmentByNumber(newBooking.apartment());
         if(!apt.isAuthenticated(token)){

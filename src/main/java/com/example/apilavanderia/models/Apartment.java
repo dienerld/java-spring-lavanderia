@@ -20,6 +20,9 @@ public class Apartment {
 
     private String tokenLogin;
 
+    public Apartment(String number){
+        this.number = password = nameResident = number;
+    }
     public Apartment(CreateApartment newApt) {
         number = password = nameResident = newApt.number();
     }
@@ -28,6 +31,7 @@ public class Apartment {
         tokenLogin = UUID.randomUUID().toString();
         return tokenLogin;
     }
+
 
     public boolean isAuthenticated(String token){
         return tokenLogin != null && tokenLogin.equals(token);

@@ -1,4 +1,6 @@
 package com.example.apilavanderia.dtos;
 
-public record RequestLogin(String number, String password) {
+import jakarta.validation.constraints.NotBlank;
+
+public record RequestLogin(@NotBlank String number, @NotBlank String password) {
 }
