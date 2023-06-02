@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/bookings")
@@ -45,10 +46,6 @@ public class BookingController {
                 .filter(b -> newBooking.date().plusDays(4).isBefore(b.getDate()))
                 .toList();
 
-
-
-
-
         if (filterApt.size() > 0)
 
             throw new BookingException("Usuário com agendamento no período de +-4 dias!");
@@ -72,6 +69,7 @@ public class BookingController {
 
         var booking = new Booking(newBooking, apt);
         database.addBookings(booking);
+        apt.addBooking(booking);
 
         return ResponseEntity.ok().body(new OutputBooking(booking));
 
@@ -84,25 +82,27 @@ public class BookingController {
     }
 
 
-    @DeleteMapping("/{number}/{id}")
-    public ResponseEntity delete( @PathVariable("number") String number , @PathVariable("id") int id , @RequestHeader("AuthToken") String token) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity delete(@PathVariable("id") int id , @RequestHeader("AuthToken") String token) {
+        try {
+            var booking = database.getBookingById(id);
 
-        var apt = database.getApartmentByNumber(number);
+            if(!booking.getApartment().isAuthenticated(token)){
+                return ResponseEntity.badRequest().body(new ResponseError("Token Inválido", "Unauthorized"));
+            }
 
-        if(!apt.isAuthenticated(token)){
-            return ResponseEntity.badRequest().body(new ResponseError("Token Inválido", "Unauthorized"));
+            var today = LocalDate.now();
+
+            if(today.isAfter(booking.getDate())){
+                return ResponseEntity.badRequest().body(new ResponseError("Não é possivel realizar essa exclusão", "Bad Request Error"));
+            }
+
+            database.delete(booking);
+
+            return ResponseEntity.noContent().build();
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.badRequest().body(new ResponseError(e.getMessage(), e.getClass().getName()));
         }
-
-        var booking = database.getBookingById(id);
-        var today = LocalDate.now();
-
-        if(today.isAfter(booking.getDate())){
-            return ResponseEntity.badRequest().body(new ResponseError("Não é possivel realizar essa exclusão", "Bad Request Error"));
-        }
-
-        database.delete(booking);
-
-        return ResponseEntity.noContent().build();
     }
 
 }

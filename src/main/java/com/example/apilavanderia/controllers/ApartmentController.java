@@ -1,9 +1,6 @@
 package com.example.apilavanderia.controllers;
 
-import com.example.apilavanderia.dtos.CreateApartment;
-import com.example.apilavanderia.dtos.OutputApartment;
-import com.example.apilavanderia.dtos.ResponseError;
-import com.example.apilavanderia.dtos.UpdateApartment;
+import com.example.apilavanderia.dtos.*;
 import com.example.apilavanderia.models.Apartment;
 import com.example.apilavanderia.database.Database;
 import jakarta.validation.Valid;
@@ -23,7 +20,21 @@ public class ApartmentController {
 
     @GetMapping
     public ResponseEntity getAll() {
-        return ResponseEntity.ok().body(database.getApartments());
+
+        return ResponseEntity.ok().body(database.getApartments().stream().map(OutputApartment::new).toList());
+    }
+
+    @GetMapping("/{number}")
+    public ResponseEntity getOne(@PathVariable String number, @RequestHeader("AuthToken") String token) {
+        var apt = database.getApartmentByNumber(number);
+
+        if(!apt.isAuthenticated(token)){
+            return ResponseEntity.badRequest()
+                    .body(new ResponseError("Token Inválido", "Unauthorized"));
+        }
+
+        return ResponseEntity.ok().body(new OutputApartmentWithHistory(apt));
+
     }
 
     @PostMapping

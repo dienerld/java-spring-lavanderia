@@ -46,11 +46,18 @@ public class Database {
     public void delete(Booking booking){
         bookings.remove(booking);
     }
+
     public Booking getBookingById(int id) {
         return bookings.stream()
-                .filter(b -> b.getId() == id )
+                .filter(b -> b.getId() == id)
                 .findFirst()
                 .orElseThrow();
     }
+
+    public void deleteBooking(Booking booking) {
+        bookings.remove(booking);
+    }
+
+
 
 }

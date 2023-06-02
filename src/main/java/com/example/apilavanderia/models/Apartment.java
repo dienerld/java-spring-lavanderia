@@ -3,6 +3,8 @@ import com.example.apilavanderia.dtos.CreateApartment;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -20,11 +22,17 @@ public class Apartment {
 
     private String tokenLogin;
 
+    private List<Booking> bookings;
+
     public Apartment(String number){
+
         this.number = password = nameResident = number;
+        bookings = new ArrayList<>();
     }
     public Apartment(CreateApartment newApt) {
+
         number = password = nameResident = newApt.number();
+        bookings = new ArrayList<>();
     }
 
     public String generateToken(){
@@ -32,8 +40,11 @@ public class Apartment {
         return tokenLogin;
     }
 
-
     public boolean isAuthenticated(String token){
         return tokenLogin != null && tokenLogin.equals(token);
+    }
+
+    public void addBooking(Booking b) {
+        bookings.add(b);
     }
 }
