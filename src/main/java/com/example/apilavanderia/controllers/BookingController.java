@@ -7,8 +7,11 @@ import com.example.apilavanderia.dtos.CreateBooking;
 import com.example.apilavanderia.dtos.OutputBooking;
 import com.example.apilavanderia.database.Database;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Past;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/bookings")
@@ -81,14 +84,25 @@ public class BookingController {
     }
 
 
-    @DeleteMapping("/{id}")
-    public String delete(@PathVariable int id) {
-        var deletedId = database.getBookings().removeIf(b -> b.getId() == id);
-        if (deletedId) {
-            return "A reserva foi excluída";
-        }
-        return "Reserva não encontrada";
+    @DeleteMapping("/{number}/{id}")
+    public ResponseEntity delete( @PathVariable("number") String number , @PathVariable("id") int id , @RequestHeader("AuthToken") String token) {
 
+        var apt = database.getApartmentByNumber(number);
+
+        if(!apt.isAuthenticated(token)){
+            return ResponseEntity.badRequest().body(new ResponseError("Token Inválido", "Unauthorized"));
+        }
+
+        var booking = database.getBookingById(id);
+        var today = LocalDate.now();
+
+        if(today.isAfter(booking.getDate())){
+            return ResponseEntity.badRequest().body(new ResponseError("Não é possivel realizar essa exclusão", "Bad Request Error"));
+        }
+
+        database.delete(booking);
+
+        return ResponseEntity.noContent().build();
     }
 
 }
