@@ -11,7 +11,7 @@ public class Database {
     public static List<Apartment> apartments = new ArrayList<>();
 
     public static void createUser(){
-        var apt = new Apartment("2");
+        var apt = new Apartment("8");
         apartments.add(apt);
 
         System.out.println(apt.generateToken());
