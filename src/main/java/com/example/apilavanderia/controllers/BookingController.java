@@ -7,7 +7,6 @@ import com.example.apilavanderia.dtos.CreateBooking;
 import com.example.apilavanderia.dtos.OutputBooking;
 import com.example.apilavanderia.database.Database;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Past;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
