@@ -19,16 +19,35 @@ public class ApartmentController {
     }
 
     @GetMapping
-    public ResponseEntity getAll() {
+    public ResponseEntity getAll(
+            @RequestParam(required = false) String phone,
+            @RequestParam(required = false) Boolean hasLogged
+    ) {
+        var apartments = database.getApartments();
 
-        return ResponseEntity.ok().body(database.getApartments().stream().map(OutputApartment::new).toList());
+        if (phone != null) {
+            apartments = apartments
+                    .stream()
+                    .filter(apt -> apt.getPhone() != null && apt.getPhone().contains((phone)))
+                    .toList();
+        }
+
+        if (hasLogged != null) {
+            apartments = apartments
+                    .stream()
+                    .filter(apt -> hasLogged ? apt.getTokenLogin() != null : apt.getTokenLogin() == null)
+                    .toList();
+        }
+
+
+        return ResponseEntity.ok().body(apartments.stream().map(OutputApartment::new).toList());
     }
 
     @GetMapping("/{number}")
     public ResponseEntity getOne(@PathVariable String number, @RequestHeader("AuthToken") String token) {
         var apt = database.getApartmentByNumber(number);
 
-        if(!apt.isAuthenticated(token)){
+        if (!apt.isAuthenticated(token)) {
             return ResponseEntity.badRequest()
                     .body(new ResponseError("Token Inválido", "Unauthorized"));
         }
@@ -52,7 +71,7 @@ public class ApartmentController {
     }
 
     @PutMapping("/{number}")
-    public ResponseEntity update(@RequestBody  UpdateApartment dto,
+    public ResponseEntity update(@RequestBody UpdateApartment dto,
                                  @PathVariable String number,
                                  @RequestHeader("AuthToken") String token) {
 
@@ -60,9 +79,9 @@ public class ApartmentController {
 
             var apt = database.getApartmentByNumber(number);
 
-            if(!apt.isAuthenticated(token)){
+            if (!apt.isAuthenticated(token)) {
                 return ResponseEntity.badRequest()
-                                .body(new ResponseError("Token Inválido", "Unauthorized"));
+                        .body(new ResponseError("Token Inválido", "Unauthorized"));
             }
 
             if (dto.phone() != null) apt.setPhone(dto.phone());
