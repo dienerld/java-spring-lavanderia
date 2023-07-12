@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/bookings")
@@ -82,7 +83,7 @@ public class BookingController {
 
 
     @DeleteMapping("/{id}")
-    public ResponseEntity delete(@PathVariable("id") int id , @RequestHeader("AuthToken") String token) {
+    public ResponseEntity delete(@PathVariable("id") UUID id , @RequestHeader("AuthToken") String token) {
         try {
             var booking = database.getBookingById(id);
 

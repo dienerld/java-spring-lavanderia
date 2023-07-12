@@ -4,17 +4,27 @@ import com.example.apilavanderia.database.Database;
 import com.example.apilavanderia.dtos.CreateBooking;
 import com.example.apilavanderia.enums.Machine;
 import com.example.apilavanderia.enums.Shift;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter
 @Setter
+@Entity
+@Table(name="bookings")
+@AllArgsConstructor
+
 public class Booking {
 
-    private int id;
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+    @ManyToOne
+    @JoinColumn
     private Apartment apartment;
 
     private LocalDate date;
@@ -24,7 +34,6 @@ public class Booking {
     private Machine machine;
 
     public Booking(CreateBooking newBooking, Apartment apt) {
-        id = Database.bookings.size()+1;
         apartment = apt;
         date = newBooking.date();
         hour = newBooking.hour();

@@ -4,26 +4,27 @@ import com.example.apilavanderia.dtos.*;
 import com.example.apilavanderia.models.Apartment;
 import com.example.apilavanderia.database.Database;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import repositories.ApartmentRepository;
 
 import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/apartments")
-public class ApartmentController {
-    Database database;
 
-    public ApartmentController() {
-        database = new Database();
-    }
+public class ApartmentController {
+    @Autowired
+    private ApartmentRepository repository;
+
 
     @GetMapping
     public ResponseEntity getAll(
             @RequestParam(required = false) String phone,
             @RequestParam(required = false) Boolean hasLogged
     ) {
-        var apartments = database.getApartments();
+        var apartments = repository.findAll();
 
         if (phone != null) {
             apartments = apartments
@@ -45,7 +46,7 @@ public class ApartmentController {
 
     @GetMapping("/{number}")
     public ResponseEntity getOne(@PathVariable String number, @RequestHeader("AuthToken") String token) {
-        var apt = database.getApartmentByNumber(number);
+        var apt = repository.getReferenceById(number);
 
         if (!apt.isAuthenticated(token)) {
             return ResponseEntity.badRequest()
@@ -58,15 +59,14 @@ public class ApartmentController {
 
     @PostMapping
     public ResponseEntity create(@RequestBody @Valid CreateApartment newApt) {
-        var aptExists = database.getApartments().stream()
-                .filter(apt -> apt.getNumber().equalsIgnoreCase(newApt.number()))
-                .findFirst();
-        if (aptExists.isPresent()) {
+
+        var aptExists = repository.existsById(newApt.number());
+        if (aptExists) {
             return ResponseEntity.badRequest()
                     .body(new ResponseError("Apartamento já existente!", "."));
         }
         var apt = new Apartment(newApt);
-        database.addApartment(apt);
+        repository.save(apt);
         return ResponseEntity.ok().body(new OutputApartment(apt));
     }
 
@@ -77,7 +77,7 @@ public class ApartmentController {
 
         try {
 
-            var apt = database.getApartmentByNumber(number);
+            var apt = repository.getReferenceById(number);
 
             if (!apt.isAuthenticated(token)) {
                 return ResponseEntity.badRequest()
@@ -93,6 +93,7 @@ public class ApartmentController {
                     return ResponseEntity.badRequest().body(new ResponseError("A senha precisa ter no mínimo 6 caracteres.", "InvalidPassword."));
                 }
             }
+            repository.save(apt);
 
             return ResponseEntity.ok().body(apt);
 

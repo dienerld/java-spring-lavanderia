@@ -5,6 +5,7 @@ import com.example.apilavanderia.models.Booking;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 
 public class Database {
@@ -47,7 +48,7 @@ public class Database {
         bookings.remove(booking);
     }
 
-    public Booking getBookingById(int id) {
+    public Booking getBookingById(UUID id) {
         return bookings.stream()
                 .filter(b -> b.getId() == id)
                 .findFirst()
