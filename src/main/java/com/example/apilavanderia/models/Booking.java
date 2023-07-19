@@ -7,6 +7,7 @@ import com.example.apilavanderia.enums.Shift;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
@@ -15,8 +16,9 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name="bookings")
+@Table(name = "bookings")
 @AllArgsConstructor
+@NoArgsConstructor
 
 public class Booking {
 

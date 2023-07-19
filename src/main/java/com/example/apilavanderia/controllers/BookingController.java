@@ -2,12 +2,15 @@ package com.example.apilavanderia.controllers;
 
 import com.example.apilavanderia.customExceptions.BookingException;
 import com.example.apilavanderia.dtos.ResponseError;
+import com.example.apilavanderia.enums.Machine;
+import com.example.apilavanderia.enums.Shift;
 import com.example.apilavanderia.models.Booking;
 import com.example.apilavanderia.dtos.CreateBooking;
 import com.example.apilavanderia.dtos.OutputBooking;
 import com.example.apilavanderia.database.Database;
 import com.example.apilavanderia.repositories.ApartmentRepository;
 import com.example.apilavanderia.repositories.BookingRepository;
+import com.example.apilavanderia.repositories.specifications.BookingsSpecifications;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,8 +30,12 @@ public class BookingController {
     private ApartmentRepository apartmentRepository;
 
     @GetMapping
-    public ResponseEntity getAll() {
-        return ResponseEntity.ok().body(bookingRepository.findAll().stream().map(OutputBooking::new).toList());
+    public ResponseEntity getAll(
+            @RequestParam(required = false) @Valid Machine machine,
+            @RequestParam(required = false) @Valid Shift hour
+    ) {
+        var bookingsFiltered = bookingRepository.findAll(BookingsSpecifications.filters(machine, hour));
+        return ResponseEntity.ok().body(bookingsFiltered.stream().map(OutputBooking::new).toList());
     }
 
     @PostMapping

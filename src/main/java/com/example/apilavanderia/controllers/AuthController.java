@@ -3,7 +3,9 @@ package com.example.apilavanderia.controllers;
 import com.example.apilavanderia.dtos.RequestLogin;
 import com.example.apilavanderia.database.Database;
 import com.example.apilavanderia.dtos.ResponseError;
+import com.example.apilavanderia.repositories.ApartmentRepository;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,21 +18,19 @@ import java.util.NoSuchElementException;
 @RequestMapping("/auth")
 public class AuthController {
 
-    Database database;
-
-    public AuthController() {
-        database = new Database();
-    }
+    @Autowired
+    private ApartmentRepository repository;
 
     @PostMapping
     public ResponseEntity login(@RequestBody @Valid RequestLogin login) {
         try {
-            var apt = database.getApartmentByNumber(login.number());
-            if(!apt.getPassword().equals(login.password())) {
+            var apt = repository.getReferenceById(login.number());
+            if (!apt.getPassword().equals(login.password())) {
                 return ResponseEntity.badRequest().body(new ResponseError("Credenciais inválidas.", "Unauthorized"));
             }
-
-            return ResponseEntity.ok().body(apt.generateToken());
+            var token = apt.generateToken();
+            repository.save(apt);
+            return ResponseEntity.ok().body(token);
         } catch (NoSuchElementException e) {
             return ResponseEntity.badRequest().body(new ResponseError("Credenciais inválidas.", e.getClass().getName()));
         }
