@@ -2,6 +2,7 @@ package com.example.apilavanderia.controllers;
 
 import com.example.apilavanderia.dtos.*;
 import com.example.apilavanderia.models.Apartment;
+import com.example.apilavanderia.repositories.specifications.ApartmentsSpecifications;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,24 +22,9 @@ public class ApartmentController {
     @GetMapping
     public ResponseEntity getAll(
             @RequestParam(required = false) String phone,
-            @RequestParam(required = false) Boolean hasLogged
+            @RequestParam(required = false) String hasLogged
     ) {
-        var apartments = repository.findAll();
-
-        if (phone != null) {
-            apartments = apartments
-                    .stream()
-                    .filter(apt -> apt.getPhone() != null && apt.getPhone().contains((phone)))
-                    .toList();
-        }
-
-        if (hasLogged != null) {
-            apartments = apartments
-                    .stream()
-                    .filter(apt -> hasLogged ? apt.getTokenLogin() != null : apt.getTokenLogin() == null)
-                    .toList();
-        }
-
+        var apartments = repository.findAll(ApartmentsSpecifications.filters(phone,hasLogged));
 
         return ResponseEntity.ok().body(apartments.stream().map(OutputApartment::new).toList());
     }
