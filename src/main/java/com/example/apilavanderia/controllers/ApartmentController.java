@@ -2,12 +2,11 @@ package com.example.apilavanderia.controllers;
 
 import com.example.apilavanderia.dtos.*;
 import com.example.apilavanderia.models.Apartment;
-import com.example.apilavanderia.database.Database;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import repositories.ApartmentRepository;
+import com.example.apilavanderia.repositories.ApartmentRepository;
 
 import java.util.NoSuchElementException;
 
