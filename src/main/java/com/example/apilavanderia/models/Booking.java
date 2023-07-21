@@ -26,7 +26,7 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     @ManyToOne
-    @JoinColumn
+    @JoinColumn(referencedColumnName = "number", name = "apartment_FK")
     private Apartment apartment;
 
     private LocalDate date;
