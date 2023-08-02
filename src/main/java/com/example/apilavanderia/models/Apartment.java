@@ -1,4 +1,6 @@
 package com.example.apilavanderia.models;
+
+import com.example.apilavanderia.customExceptions.UnauthorizedException;
 import com.example.apilavanderia.dtos.CreateApartment;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -16,7 +18,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name="apartments")
+@Table(name = "apartments")
 @AllArgsConstructor
 @NoArgsConstructor
 
@@ -35,24 +37,27 @@ public class Apartment {
     @OneToMany(mappedBy = "apartment")
     private List<Booking> bookings;
 
-    public Apartment(String number){
+    public Apartment(String number) {
 
         this.number = password = nameResident = number;
         bookings = new ArrayList<>();
     }
+
     public Apartment(CreateApartment newApt) {
 
         number = password = nameResident = newApt.number();
         bookings = new ArrayList<>();
     }
 
-    public String generateToken(){
+    public String generateToken() {
         tokenLogin = UUID.randomUUID().toString();
         return tokenLogin;
     }
 
-    public boolean isAuthenticated(String token){
-        return tokenLogin != null && tokenLogin.equals(token);
+    public boolean isAuthenticated(String token) {
+        if (tokenLogin == null)
+            throw new UnauthorizedException("Token nao enviado");
+        return tokenLogin.equals(token);
     }
 
     public void addBooking(Booking b) {

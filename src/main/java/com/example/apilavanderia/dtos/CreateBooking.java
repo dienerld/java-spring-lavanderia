@@ -8,5 +8,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 
-public record CreateBooking(@NotBlank  String apartment, @NotNull Machine machine, @NotNull @FutureOrPresent LocalDate date, @NotNull Shift hour) {
+public record CreateBooking(
+        @NotBlank String apartment, @NotNull Machine machine, @NotNull @FutureOrPresent LocalDate date,
+        @NotNull Shift hour) {
 }

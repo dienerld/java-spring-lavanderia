@@ -1,15 +1,18 @@
 package com.example.apilavanderia.controllers;
 
+import com.example.apilavanderia.customExceptions.AlreadyExistsException;
+import com.example.apilavanderia.customExceptions.UnauthorizedException;
 import com.example.apilavanderia.dtos.*;
 import com.example.apilavanderia.models.Apartment;
 import com.example.apilavanderia.repositories.specifications.ApartmentsSpecifications;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.example.apilavanderia.repositories.ApartmentRepository;
 
-import java.util.NoSuchElementException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/apartments")
@@ -20,22 +23,22 @@ public class ApartmentController {
 
 
     @GetMapping
-    public ResponseEntity getAll(
+    public ResponseEntity<List<OutputApartment>> getAll(
             @RequestParam(required = false) String phone,
             @RequestParam(required = false) String hasLogged
     ) {
-        var apartments = repository.findAll(ApartmentsSpecifications.filters(phone,hasLogged));
+        var apartments = repository.findAll(ApartmentsSpecifications.filters(phone, hasLogged));
 
         return ResponseEntity.ok().body(apartments.stream().map(OutputApartment::new).toList());
     }
 
+    @ApiResponse(useReturnTypeSchema = true, responseCode = "200", description = "Retorna o apartamento com aquele numero.")
     @GetMapping("/{number}")
-    public ResponseEntity getOne(@PathVariable String number, @RequestHeader("AuthToken") String token) {
+    public ResponseEntity<OutputApartmentWithHistory> getOne(@PathVariable String number, @RequestHeader("AuthToken") String token) {
         var apt = repository.getReferenceById(number);
 
         if (!apt.isAuthenticated(token)) {
-            return ResponseEntity.badRequest()
-                    .body(new ResponseError("Token Inválido", "Unauthorized"));
+            throw new UnauthorizedException("Token Inválido");
         }
 
         return ResponseEntity.ok().body(new OutputApartmentWithHistory(apt));
@@ -43,12 +46,11 @@ public class ApartmentController {
     }
 
     @PostMapping
-    public ResponseEntity create(@RequestBody @Valid CreateApartment newApt) {
+    public ResponseEntity<OutputApartment> create(@RequestBody @Valid CreateApartment newApt) {
 
         var aptExists = repository.existsById(newApt.number());
         if (aptExists) {
-            return ResponseEntity.badRequest()
-                    .body(new ResponseError("Apartamento já existente!", "."));
+            throw new AlreadyExistsException("Apartamento ja existe");
         }
         var apt = new Apartment(newApt);
         repository.save(apt);
@@ -56,35 +58,27 @@ public class ApartmentController {
     }
 
     @PutMapping("/{number}")
-    public ResponseEntity update(@RequestBody UpdateApartment dto,
-                                 @PathVariable String number,
-                                 @RequestHeader("AuthToken") String token) {
+    public ResponseEntity<OutputApartment> update(@RequestBody UpdateApartment dto,
+                                                  @PathVariable String number,
+                                                  @RequestHeader("AuthToken") String token
+    ) {
+        var apt = repository.getReferenceById(number);
 
-        try {
-
-            var apt = repository.getReferenceById(number);
-
-            if (!apt.isAuthenticated(token)) {
-                return ResponseEntity.badRequest()
-                        .body(new ResponseError("Token Inválido", "Unauthorized"));
-            }
-
-            if (dto.phone() != null) apt.setPhone(dto.phone());
-            if (dto.nameResident() != null) apt.setNameResident(dto.nameResident());
-            if (dto.password() != null) {
-                if (dto.password().length() >= 6) {
-                    apt.setPassword(dto.password());
-                } else {
-                    return ResponseEntity.badRequest().body(new ResponseError("A senha precisa ter no mínimo 6 caracteres.", "InvalidPassword."));
-                }
-            }
-            repository.save(apt);
-
-            return ResponseEntity.ok().body(apt);
-
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.badRequest().body(new ResponseError(e.getMessage(), e.getClass().getCanonicalName()));
+        if (apt.isAuthenticated(token)) {
+            throw new UnauthorizedException("Token Inválido");
         }
+
+        if (dto.phone() != null) apt.setPhone(dto.phone());
+        if (dto.nameResident() != null) apt.setNameResident(dto.nameResident());
+        if (dto.password() != null) {
+            if (dto.password().length() < 6) {
+                throw new RuntimeException("Senha muito curta");
+            }
+            apt.setPassword(dto.password());
+        }
+        repository.save(apt);
+
+        return ResponseEntity.ok().body(new OutputApartment(apt));
 
     }
 
