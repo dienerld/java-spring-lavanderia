@@ -20,11 +20,11 @@ CMD ["mvn", "clean", "package", "-DskipTests"]
 ### Production
 FROM openjdk:19-alpine
 
-# Defina o diretório de trabalho como /app
-WORKDIR /app
-
 # Copie o código-fonte da aplicação para o contêiner
 COPY --from=builder /app/target/*.jar /app.jar
+
+# Defina o diretório de trabalho como /app
+WORKDIR /app
 
 # Exponha a porta 8080 para acesso externo
 EXPOSE 8080
