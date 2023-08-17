@@ -41,42 +41,31 @@ public class BookingController {
     }
 
     @PostMapping
-    public ResponseEntity<OutputBooking> create(@RequestBody @Valid CreateBooking newBooking, @RequestHeader("AuthToken") String token) {
+    public ResponseEntity<OutputBooking> create(@RequestBody @Valid CreateBooking newBooking) {
 
         var apt = apartmentRepository.getReferenceById(newBooking.apartment());
-        if (apt.isAuthenticated(token)) {
-            throw new UnauthorizedException("Token invalido");
-        }
-        var bookings = bookingRepository.getBookingsByApartment(apt);
+//        if (apt.isAuthenticated(token)) {
+//            throw new UnauthorizedException("Token invalido");
+//        }
+        var bookings = bookingRepository.findByApartmentAndDateBetween(
+                apt,
+                newBooking.date().minusDays(4),
+                newBooking.date().plusDays(4)
+        );
 
-        // Verificar se usuário já possui agendamento no range de +-4 dias
 
-        var filterApt = bookings.stream()
-                .filter(b -> b.getApartment().equals(apt))
-                .filter(b -> newBooking.date().minusDays(4).isAfter(b.getDate()))
-                .filter(b -> newBooking.date().plusDays(4).isBefore(b.getDate()))
-                .toList();
-
-        if (!filterApt.isEmpty())
-            throw new BookingException("Usuário com agendamento no período de +-4 dias!");
+        if (!bookings.isEmpty())
+            throw new BookingException("User com agendamento no periodo de +-4 dias!");
 
 
         // Verificar se tem agendamento para mesma data
-        var filteredList = bookings.stream()
-                .filter(b -> b.getDate().equals(newBooking.date()))
-                .filter(b -> b.getMachine().equals(newBooking.machine()))
-                .toList();
+        var machineHasOccupied = bookingRepository.findByDateAndMachineAndHour(
+                newBooking.date(),
+                newBooking.machine(),
+                newBooking.hour()
+        );
 
-        if (!filteredList.isEmpty()) {
-            // verifica se maquina esta ocupada no dia
-            for (Booking b : filteredList) {
-                // Verificar se máquina está reservada para X hora
-                if (b.getHour().equals(newBooking.hour())) {
-                    throw new BookingException("Máquina já agendada neste horário.");
-                }
-            }
-        }
-
+        if (!machineHasOccupied.isEmpty()) throw new BookingException("Maquina ja agendada neste horario.");
         var booking = new Booking(newBooking, apt);
         bookingRepository.save(booking);
         apt.addBooking(booking);
