@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class ApiLavanderiaApplication {
 
 	public static void main(String[] args) {
+		system.out.println("add feature");
 		Database.createUser();
 		SpringApplication.run(ApiLavanderiaApplication.class, args);
 	}
